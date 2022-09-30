@@ -203,13 +203,10 @@ class FourInARow:
                     print("Player ", player_number + 1, ": ")
                     if player_number == 0:
                         posx = action.pos[0]
-                        column = int(math.floor(posx/100))
-                        self.board.add(column, player_number + 1)
-                        '''
                         valid_input = False
                         while not valid_input:
                             try:
-                                column = int(input("Please input slot: "))
+                                column = int(math.floor(posx/100))
                             except ValueError:
                                 print("Input must be an integer in the range 0 to ",
                                       self.board.size)
@@ -222,7 +219,7 @@ class FourInARow:
                                         valid_input = True
                                     else:
                                         print("Column ", column,
-                                              "is alrady full. Please choose another one.")'''
+                                              "is alrady full. Please choose another one.")
                     else:
                         # Choose move which maximises new points for computer player
                         (best_column,
@@ -247,12 +244,12 @@ class FourInARow:
                     self.board.display(screen)
                     pygame.display.update()
                     player_number = (player_number + 1) % 2
-                if self.board.points[0] > self.board.points[1]:
-                    print("Player 1 (circles) wins!")
-                elif self.board.points[0] < self.board.points[1]:
-                    print("Player 2 (crosses) wins!")
-                else:
-                    print("It's a draw!")
+        if self.board.points[0] > self.board.points[1]:
+            print("Player 1 (circles) wins!")
+        elif self.board.points[0] < self.board.points[1]:
+            print("Player 2 (crosses) wins!")
+        else:
+            print("It's a draw!")
 
 
 pygame.init()
