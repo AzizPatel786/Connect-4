@@ -49,7 +49,7 @@ class GameBoard:
                                                 100))
                 pygame.draw.circle(screen, black, (int(col * 100 + 100 / 2),
                                                    int(row * 100 + 100 + 100 / 2)),
-                                   100)
+                                   100/2 - 5)
 
     def num_new_points(self, column, row, player):
         vertical_count = 0
@@ -176,6 +176,7 @@ class FourInARow:
 
         print("*****************NEW GAME*****************")
         self.board.display(screen)
+        pygame.display.update()
         player_number = 0
         print()
         while not self.board.game_over():
