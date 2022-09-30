@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 
 
@@ -21,7 +23,7 @@ class GameBoard:
                 return False
         return True
 
-    def display(self):
+    def display(self, screen):
         for row in range(self.size - 1, -1, -1):
             for col in range(0, self.size):
                 if self.items[col][row] == 0:
@@ -39,6 +41,15 @@ class GameBoard:
         print()
         print(f'Points player 1: {self.points[0]}')
         print(f'Points player 2: {self.points[1]}')
+        blue = (0, 0, 255)
+        black = (0, 0, 0)
+        for col in range(self.size):
+            for row in range(self.size):
+                pygame.draw.rect(screen, blue, (col * 100, row * 100 + 100, 100,
+                                                100))
+                pygame.draw.circle(screen, black, (int(col * 100 + 100 / 2),
+                                                   int(row * 100 + 100 + 100 / 2)),
+                                   100)
 
     def num_new_points(self, column, row, player):
         vertical_count = 0
@@ -157,64 +168,73 @@ class FourInARow:
         self.size = size
 
     def play(self):
-        print("*****************NEW GAME*****************")
-        self.board.display()
-        player_number = 0
-        print()
-        pygame.init()
         frame_size = 100
         width = frame_size * self.size
         height = frame_size * (self.size + 1)
+        area = (width, height)
+        screen = pygame.display.set_mode(area)
+
+        print("*****************NEW GAME*****************")
+        self.board.display(screen)
+        player_number = 0
+        print()
         while not self.board.game_over():
-            print("Player ", player_number + 1, ": ")
-            if player_number == 0:
-                valid_input = False
-                while not valid_input:
-                    try:
-                        column = int(input("Please input slot: "))
-                    except ValueError:
-                        print("Input must be an integer in the range 0 to ",
-                              self.board.size)
-                    else:
-                        if column < 0 or column >= self.board.size:
-                            print("Input must be an integer in the range 0 to ",
-                                  self.board.size)
-                        else:
-                            if self.board.add(column, player_number + 1):
-                                valid_input = True
+            for action in pygame.event.get():
+                if action.type == pygame.QUIT:
+                    sys.exit()
+                if action.type == pygame.MOUSEBUTTONDOWN:
+                    print()
+                    '''print("Player ", player_number + 1, ": ")
+                    if player_number == 0:
+                        valid_input = False
+                        while not valid_input:
+                            try:
+                                column = int(input("Please input slot: "))
+                            except ValueError:
+                                print("Input must be an integer in the range 0 to ",
+                                      self.board.size)
                             else:
-                                print("Column ", column,
-                                      "is alrady full. Please choose another one.")
-            else:
-                # Choose move which maximises new points for computer player
-                (best_column,
-                 max_points) = self.board.column_resulting_in_max_points(2)
-                if max_points > 0:
-                    column = best_column
-                else:
-                    # if no move adds new points choose move which minimises
-                    # points opponent player gets
-                    (best_column,
-                     max_points) = self.board.column_resulting_in_max_points(1)
-                    if max_points > 0:
-                        column = best_column
+                                if column < 0 or column >= self.board.size:
+                                    print("Input must be an integer in the range 0 to ",
+                                          self.board.size)
+                                else:
+                                    if self.board.add(column, player_number + 1):
+                                        valid_input = True
+                                    else:
+                                        print("Column ", column,
+                                              "is alrady full. Please choose another one.")
                     else:
-                        # if no opponent move creates new points then choose
-                        # column as close to middle as possible
-                        column = \
-                            self.board.free_slots_as_close_to_middle_as_possible()[
-                                0]
-                self.board.add(column, player_number + 1)
-                print("The AI chooses column ", column)
-            self.board.display()
-            player_number = (player_number + 1) % 2
-        if self.board.points[0] > self.board.points[1]:
-            print("Player 1 (circles) wins!")
-        elif self.board.points[0] < self.board.points[1]:
-            print("Player 2 (crosses) wins!")
-        else:
-            print("It's a draw!")
+                        # Choose move which maximises new points for computer player
+                        (best_column,
+                         max_points) = self.board.column_resulting_in_max_points(2)
+                        if max_points > 0:
+                            column = best_column
+                        else:
+                            # if no move adds new points choose move which minimises
+                            # points opponent player gets
+                            (best_column,
+                             max_points) = self.board.column_resulting_in_max_points(1)
+                            if max_points > 0:
+                                column = best_column
+                            else:
+                                # if no opponent move creates new points then choose
+                                # column as close to middle as possible
+                                column = \
+                                    self.board.free_slots_as_close_to_middle_as_possible()[
+                                        0]
+                        self.board.add(column, player_number + 1)
+                        print("The AI chooses column ", column)
+                    self.board.display(screen)
+                    pygame.display.update()
+                    player_number = (player_number + 1) % 2
+                if self.board.points[0] > self.board.points[1]:
+                    print("Player 1 (circles) wins!")
+                elif self.board.points[0] < self.board.points[1]:
+                    print("Player 2 (crosses) wins!")
+                else:
+                    print("It's a draw!")'''
 
 
+pygame.init()
 game = FourInARow(6)
 game.play()
