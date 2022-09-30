@@ -1,3 +1,4 @@
+import math
 import sys
 
 import pygame
@@ -43,6 +44,9 @@ class GameBoard:
         print(f'Points player 2: {self.points[1]}')
         blue = (0, 0, 255)
         black = (0, 0, 0)
+        red = (255, 0, 0)
+        yellow =  (255,255,0)
+        height = 100 * (self.size + 1)
         for col in range(self.size):
             for row in range(self.size):
                 pygame.draw.rect(screen, blue, (col * 100, row * 100 + 100, 100,
@@ -50,6 +54,17 @@ class GameBoard:
                 pygame.draw.circle(screen, black, (int(col * 100 + 100 / 2),
                                                    int(row * 100 + 100 + 100 / 2)),
                                    100/2 - 5)
+        for row in range(self.size):
+            for col in range(self.size):
+                if self.items[col][row] == 1:
+                    pygame.draw.circle(screen, red, (
+                    int(col * 100 + 100 / 2),
+                    height - int(row * 100 + 100 / 2)), 100/2 - 5)
+                elif self.items[col][row] == 2:
+                    pygame.draw.circle(screen, yellow, (
+                    int(col * 100 + 100 / 2),
+                    height - int(row * 100 + 100 / 2)), 100/2 - 5)
+        pygame.display.update()
 
     def num_new_points(self, column, row, player):
         vertical_count = 0
@@ -185,8 +200,12 @@ class FourInARow:
                     sys.exit()
                 if action.type == pygame.MOUSEBUTTONDOWN:
                     print()
-                    '''print("Player ", player_number + 1, ": ")
+                    print("Player ", player_number + 1, ": ")
                     if player_number == 0:
+                        posx = action.pos[0]
+                        column = int(math.floor(posx/100))
+                        self.board.add(column, player_number + 1)
+                        '''
                         valid_input = False
                         while not valid_input:
                             try:
@@ -203,7 +222,7 @@ class FourInARow:
                                         valid_input = True
                                     else:
                                         print("Column ", column,
-                                              "is alrady full. Please choose another one.")
+                                              "is alrady full. Please choose another one.")'''
                     else:
                         # Choose move which maximises new points for computer player
                         (best_column,
@@ -233,7 +252,7 @@ class FourInARow:
                 elif self.board.points[0] < self.board.points[1]:
                     print("Player 2 (crosses) wins!")
                 else:
-                    print("It's a draw!")'''
+                    print("It's a draw!")
 
 
 pygame.init()
