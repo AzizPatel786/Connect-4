@@ -154,12 +154,17 @@ class GameBoard:
 class FourInARow:
     def __init__(self, size):
         self.board = GameBoard(size)
+        self.size = size
 
     def play(self):
         print("*****************NEW GAME*****************")
         self.board.display()
         player_number = 0
         print()
+        pygame.init()
+        frame_size = 100
+        width = frame_size * self.size
+        height = frame_size * (self.size + 1)
         while not self.board.game_over():
             print("Player ", player_number + 1, ": ")
             if player_number == 0:
