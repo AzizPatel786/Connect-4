@@ -221,8 +221,16 @@ class FourInARow:
                     print("Player ", player_number + 1, ": ")
                     if player_number == 0:
                         posx = action.pos[0]
-                        valid_input = False
+                        column = int(math.floor(posx / 100))
+                        if self.board.add(column, player_number + 1):
+                            self.board.display(screen)
+                            pygame.display.update()
+                            player_number = (player_number + 1) % 2
+                        else:
+                            print('suuuiiii')
+                        """valid_input = False
                         while not valid_input:
+                            
                             try:
                                 column = int(math.floor(posx / 100))
                             except ValueError:
@@ -239,10 +247,8 @@ class FourInARow:
                                         valid_input = True
                                 else:
                                     print("Column ", column,
-                                          "is alrady full. Please choose another one.")
-                    self.board.display(screen)
-                    pygame.display.update()
-                    player_number = (player_number + 1) % 2
+                                          "is alrady full. Please choose another one.")"""
+
                 elif player_number == 1:
                     # Choose move which maximises new points for computer player
                     (best_column,
