@@ -45,7 +45,7 @@ class GameBoard:
         blue = (0, 0, 255)
         black = (0, 0, 0)
         red = (255, 0, 0)
-        yellow =  (255,255,0)
+        yellow = (255, 255, 0)
         height = 100 * (self.size + 1)
         for col in range(self.size):
             for row in range(self.size):
@@ -53,17 +53,17 @@ class GameBoard:
                                                 100))
                 pygame.draw.circle(screen, black, (int(col * 100 + 100 / 2),
                                                    int(row * 100 + 100 + 100 / 2)),
-                                   100/2 - 5)
+                                   100 / 2 - 5)
         for row in range(self.size):
             for col in range(self.size):
                 if self.items[col][row] == 1:
                     pygame.draw.circle(screen, red, (
-                    int(col * 100 + 100 / 2),
-                    height - int(row * 100 + 100 / 2)), 100/2 - 5)
+                        int(col * 100 + 100 / 2),
+                        height - int(row * 100 + 100 / 2)), 100 / 2 - 5)
                 elif self.items[col][row] == 2:
                     pygame.draw.circle(screen, yellow, (
-                    int(col * 100 + 100 / 2),
-                    height - int(row * 100 + 100 / 2)), 100/2 - 5)
+                        int(col * 100 + 100 / 2),
+                        height - int(row * 100 + 100 / 2)), 100 / 2 - 5)
         pygame.display.update()
 
     def num_new_points(self, column, row, player):
@@ -131,6 +131,9 @@ class GameBoard:
                     self.num_entries[column] += 1
                     return True
 
+    def check_top_slot(self, column):
+        return self.items[column][self.size-1] == 0
+
     def free_slots_as_close_to_middle_as_possible(self):
         output_list = []
         if self.size % 2 == 0:
@@ -188,6 +191,8 @@ class FourInARow:
         height = frame_size * (self.size + 1)
         area = (width, height)
         screen = pygame.display.set_mode(area)
+        black = (0, 0, 0)
+        red = (255, 0, 0)
 
         print("*****************NEW GAME*****************")
         self.board.display(screen)
@@ -198,7 +203,20 @@ class FourInARow:
             for action in pygame.event.get():
                 if action.type == pygame.QUIT:
                     sys.exit()
+                if action.type == pygame.MOUSEMOTION:
+                    pygame.draw.rect(screen, black, (0, 0, width, 100))
+                    if action.pos[0] > width - 50:
+                        posx = width - 50
+                    elif action.pos[0] < 50:
+                        posx = 50
+                    else:
+                        posx = action.pos[0]
+                    if player_number == 0:
+                        pygame.draw.circle(screen, red,
+                                           (posx, int(100 / 2)), 100 / 2 - 5)
+                pygame.display.update()
                 if action.type == pygame.MOUSEBUTTONDOWN:
+                    pygame.draw.rect(screen, black, (0, 0, width, 100))
                     print()
                     print("Player ", player_number + 1, ": ")
                     if player_number == 0:
@@ -206,50 +224,65 @@ class FourInARow:
                         valid_input = False
                         while not valid_input:
                             try:
-                                column = int(math.floor(posx/100))
+                                column = int(math.floor(posx / 100))
                             except ValueError:
-                                print("Input must be an integer in the range 0 to ",
-                                      self.board.size)
+                                print(
+                                    "Input must be an integer in the range 0 to ",
+                                    self.board.size)
                             else:
-                                if column < 0 or column >= self.board.size:
+                                '''if column < 0 or column >= self.board.size:
                                     print("Input must be an integer in the range 0 to ",
                                           self.board.size)
-                                else:
+                                else:'''
+                                if self.board.check_top_slot(column):
                                     if self.board.add(column, player_number + 1):
                                         valid_input = True
-                                    else:
-                                        print("Column ", column,
-                                              "is alrady full. Please choose another one.")
-                    else:
-                        # Choose move which maximises new points for computer player
-                        (best_column,
-                         max_points) = self.board.column_resulting_in_max_points(2)
-                        if max_points > 0:
-                            column = best_column
-                        else:
-                            # if no move adds new points choose move which minimises
-                            # points opponent player gets
-                            (best_column,
-                             max_points) = self.board.column_resulting_in_max_points(1)
-                            if max_points > 0:
-                                column = best_column
-                            else:
-                                # if no opponent move creates new points then choose
-                                # column as close to middle as possible
-                                column = \
-                                    self.board.free_slots_as_close_to_middle_as_possible()[
-                                        0]
-                        self.board.add(column, player_number + 1)
-                        print("The AI chooses column ", column)
+                                else:
+                                    print("Column ", column,
+                                          "is alrady full. Please choose another one.")
                     self.board.display(screen)
                     pygame.display.update()
                     player_number = (player_number + 1) % 2
+                elif player_number == 1:
+                    # Choose move which maximises new points for computer player
+                    (best_column,
+                     max_points) = self.board.column_resulting_in_max_points(2)
+                    if max_points > 0:
+                        column = best_column
+                    else:
+                        # if no move adds new points choose move which minimises
+                        # points opponent player gets
+                        (best_column,
+                         max_points) = self.board.column_resulting_in_max_points(
+                            1)
+                        if max_points > 0:
+                            column = best_column
+                        else:
+                            # if no opponent move creates new points then choose
+                            # column as close to middle as possible
+                            column = \
+                                self.board.free_slots_as_close_to_middle_as_possible()[
+                                    0]
+                    self.board.add(column, player_number + 1)
+                    print("The AI chooses column ", column)
+                    self.board.display(screen)
+                    pygame.display.update()
+                    player_number = (player_number + 1) % 2
+        pygame.draw.rect(screen, black, (0, 0, width, 100))
+        font = pygame.font.SysFont("ariel", 50)
         if self.board.points[0] > self.board.points[1]:
             print("Player 1 (circles) wins!")
+            label = font.render("Player 1 (Red) wins!", True, (255,0,0))
         elif self.board.points[0] < self.board.points[1]:
             print("Player 2 (crosses) wins!")
+            label = font.render("Player 2 (Yellow) wins!", True, (255, 255, 0))
         else:
             print("It's a draw!")
+            label = font.render("It's a draw!", True, (255, 255, 0))
+        screen.blit(label, (40, 10))
+
+        pygame.display.update()
+        pygame.time.wait(3500)
 
 
 pygame.init()
