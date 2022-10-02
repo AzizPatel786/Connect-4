@@ -64,6 +64,17 @@ class GameBoard:
                     pygame.draw.circle(screen, yellow, (
                         int(col * 100 + 100 / 2),
                         height - int(row * 100 + 100 / 2)), 100 / 2 - 5)
+        pygame.draw.rect(screen, black, (self.size*100, 350, 300,
+                                        300))
+        font = pygame.font.SysFont("ariel", 20)
+        label = font.render(f"Red Points", True, (255, 0, 0))
+        screen.blit(label, (self.size * 100 + 10, 350))
+        label = font.render(f"{self.points[0]}", True, (255, 0, 0))
+        screen.blit(label, (self.size * 100 + 10, 400))
+        label = font.render(f"AI Points", True, yellow)
+        screen.blit(label, (self.size * 100 + 10, 450))
+        label = font.render(f"{self.points[1]}", True, yellow)
+        screen.blit(label, (self.size * 100 + 10, 500))
         pygame.display.update()
 
     def num_new_points(self, column, row, player):
@@ -179,6 +190,48 @@ class GameBoard:
                 slot_number_for_max_points = available_moves[points_index]
         return tuple(slot_number_for_max_points)
 
+    def show_button(self, screen):
+        blue = (5,195,221)
+        pygame.draw.rect(screen, blue,
+                         (self.size * 100, self.size-6, 100,
+                          100))
+        font = pygame.font.SysFont("ariel", 50)
+        label = font.render(f"Hint", True,(255, 255, 0))
+        screen.blit(label, (self.size*100 + 15, 30))
+        pygame.display.update()
+
+    def display_hint(self, screen):
+        (best_column,
+         max_points) = self.column_resulting_in_max_points(2)
+        if max_points > 0:
+            column = best_column
+        else:
+            # if no move adds new points choose move which minimises
+            # points opponent player gets
+            (best_column,
+             max_points) = self.column_resulting_in_max_points(
+                1)
+            if max_points > 0:
+                column = best_column
+            else:
+                # if no opponent move creates new points then choose
+                # column as close to middle as possible
+                column = \
+                    self.free_slots_as_close_to_middle_as_possible()[
+                        0]
+
+        pygame.draw.rect(screen, (0,0,0),
+                         (self.size * 100, 100, 200,
+                          200))
+        font = pygame.font.SysFont("ariel", 20)
+        label = font.render(f"Best Column", True, (255, 255, 0))
+        screen.blit(label, (self.size * 100 + 10, 150))
+        font = pygame.font.SysFont("ariel", 50)
+        label = font.render(f"{column}", True, (255, 255, 0))
+        screen.blit(label, (self.size * 100 + 40, 200))
+        pygame.display.update()
+
+
 
 class FourInARow:
     def __init__(self, size):
@@ -187,26 +240,29 @@ class FourInARow:
 
     def play(self):
         frame_size = 100
-        width = frame_size * self.size
+        width = frame_size * self.size + frame_size
         height = frame_size * (self.size + 1)
         area = (width, height)
         screen = pygame.display.set_mode(area)
         black = (0, 0, 0)
         red = (255, 0, 0)
-
+        hint_count = 0
         print("*****************NEW GAME*****************")
         self.board.display(screen)
         pygame.display.update()
         player_number = 0
         print()
+        font = pygame.font.SysFont("ariel", 50)
+        if hint_count < 3:
+            self.board.show_button(screen)
         while not self.board.game_over():
             for action in pygame.event.get():
                 if action.type == pygame.QUIT:
                     sys.exit()
                 if action.type == pygame.MOUSEMOTION:
                     pygame.draw.rect(screen, black, (0, 0, width, 100))
-                    if action.pos[0] > width - 50:
-                        posx = width - 50
+                    if action.pos[0] > width - 150:
+                        posx = width - 150
                     elif action.pos[0] < 50:
                         posx = 50
                     else:
@@ -214,40 +270,73 @@ class FourInARow:
                     if player_number == 0:
                         pygame.draw.circle(screen, red,
                                            (posx, int(100 / 2)), 100 / 2 - 5)
+                        if hint_count < 3:
+                            self.board.show_button(screen)
+                        else:
+                            pygame.draw.rect(screen, (0, 0, 0),
+                                             (self.size * 100, 100, 200,
+                                              200))
+
                 pygame.display.update()
+                '''if hint_count < 3:
+                    self.board.show_button(screen)
+                    if action.pos[0] > width - 100 and action.pos[1] < 100:
+                        print('sui')'''
                 if action.type == pygame.MOUSEBUTTONDOWN:
                     pygame.draw.rect(screen, black, (0, 0, width, 100))
                     print()
                     print("Player ", player_number + 1, ": ")
                     if player_number == 0:
-                        posx = action.pos[0]
-                        column = int(math.floor(posx / 100))
-                        if self.board.add(column, player_number + 1):
-                            self.board.display(screen)
-                            pygame.display.update()
-                            player_number = (player_number + 1) % 2
+                        if hint_count < 3:
+                            self.board.show_button(screen)
                         else:
-                            print('suuuiiii')
-                        """valid_input = False
-                        while not valid_input:
-                            
-                            try:
-                                column = int(math.floor(posx / 100))
-                            except ValueError:
-                                print(
-                                    "Input must be an integer in the range 0 to ",
-                                    self.board.size)
+                            pygame.draw.rect(screen, (0, 0, 0),
+                                             (self.size * 100, 100, 200,
+                                              200))
+                        posx = action.pos[0]
+                        if action.pos[0] > width - 100 and action.pos[1] < 100:
+                            if hint_count < 3:
+                                self.board.display_hint(screen)
+                                hint_count += 1
                             else:
-                                '''if column < 0 or column >= self.board.size:
-                                    print("Input must be an integer in the range 0 to ",
-                                          self.board.size)
-                                else:'''
-                                if self.board.check_top_slot(column):
-                                    if self.board.add(column, player_number + 1):
-                                        valid_input = True
+                                pygame.draw.rect(screen, (0, 0, 0),
+                                                 (self.size * 100, 100, 200,
+                                                  200))
+                        column = int(math.floor(posx / 100))
+                        if posx < width-100:
+                            if self.board.add(column, player_number + 1):
+                                self.board.display(screen)
+                                pygame.display.update()
+                                player_number = (player_number + 1) % 2
+                            else:
+                                print("Column ", column,
+                                      "is alrady full. Please choose another one.")
+                                pygame.draw.rect(screen, black, (0, 0, width, 100))
+                                label = font.render(f"Column {column} is already "
+                                                    f"full."
+                                                    , True,
+                                                    (255, 255, 0))
+                                screen.blit(label, (40, 10))
+                            """valid_input = False
+                            while not valid_input:
+                                
+                                try:
+                                    column = int(math.floor(posx / 100))
+                                except ValueError:
+                                    print(
+                                        "Input must be an integer in the range 0 to ",
+                                        self.board.size)
                                 else:
-                                    print("Column ", column,
-                                          "is alrady full. Please choose another one.")"""
+                                    '''if column < 0 or column >= self.board.size:
+                                        print("Input must be an integer in the range 0 to ",
+                                              self.board.size)
+                                    else:'''
+                                    if self.board.check_top_slot(column):
+                                        if self.board.add(column, player_number + 1):
+                                            valid_input = True
+                                    else:
+                                        print("Column ", column,
+                                              "is alrady full. Please choose another one.")"""
 
                 elif player_number == 1:
                     # Choose move which maximises new points for computer player
@@ -275,7 +364,7 @@ class FourInARow:
                     pygame.display.update()
                     player_number = (player_number + 1) % 2
         pygame.draw.rect(screen, black, (0, 0, width, 100))
-        font = pygame.font.SysFont("ariel", 50)
+
         if self.board.points[0] > self.board.points[1]:
             print("Player 1 (circles) wins!")
             label = font.render("Player 1 (Red) wins!", True, (255,0,0))
