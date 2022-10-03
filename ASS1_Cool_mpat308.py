@@ -8,7 +8,7 @@ class GameBoard:
     def __init__(self, size):
         self.size = size
         self.num_entries = [0] * size
-        self.items = [[0] * size for i in range(size)]
+        self.items = [[0] * size for _ in range(size)]
         self.points = [0] * 2
 
     def num_free_positions_in_column(self, column):
@@ -49,7 +49,7 @@ class GameBoard:
         height = 100 * (self.size + 1)
         for col in range(self.size):
             for row in range(self.size):
-                pygame.draw.rect(screen, blue, (col * 100, row * 100 + 100, 100,
+                pygame.draw.rect(screen, '#187bcd', (col * 100, row * 100 + 100, 100,
                                                 100))
                 pygame.draw.circle(screen, black, (int(col * 100 + 100 / 2),
                                                    int(row * 100 + 100 + 100 / 2)),
@@ -66,13 +66,16 @@ class GameBoard:
                         height - int(row * 100 + 100 / 2)), 100 / 2 - 5)
         pygame.draw.rect(screen, black, (self.size*100, 350, 300,
                                         300))
-        font = pygame.font.SysFont("ariel", 20)
+        font = pygame.font.SysFont("ariel", 24)
         label = font.render(f"Red Points", True, (255, 0, 0))
         screen.blit(label, (self.size * 100 + 10, 350))
+        font = pygame.font.SysFont("ariel", 35)
         label = font.render(f"{self.points[0]}", True, (255, 0, 0))
         screen.blit(label, (self.size * 100 + 10, 400))
+        font = pygame.font.SysFont("ariel", 24)
         label = font.render(f"AI Points", True, yellow)
         screen.blit(label, (self.size * 100 + 10, 450))
+        font = pygame.font.SysFont("ariel", 35)
         label = font.render(f"{self.points[1]}", True, yellow)
         screen.blit(label, (self.size * 100 + 10, 500))
         pygame.display.update()
@@ -190,7 +193,7 @@ class GameBoard:
                 slot_number_for_max_points = available_moves[points_index]
         return tuple(slot_number_for_max_points)
 
-    def show_button(self, screen):
+    def show_button(self, screen, counter):
         blue = (5,195,221)
         pygame.draw.rect(screen, blue,
                          (self.size * 100, self.size-6, 100,
@@ -198,6 +201,9 @@ class GameBoard:
         font = pygame.font.SysFont("ariel", 50)
         label = font.render(f"Hint", True,(255, 255, 0))
         screen.blit(label, (self.size*100 + 15, 30))
+        font = pygame.font.SysFont("ariel", 30)
+        label = font.render(f"{3-counter} left", True, (255, 255, 0))
+        screen.blit(label, (self.size * 100 + 15, 80))
         pygame.display.update()
 
     def display_hint(self, screen):
@@ -254,7 +260,7 @@ class FourInARow:
         print()
         font = pygame.font.SysFont("ariel", 50)
         if hint_count < 3:
-            self.board.show_button(screen)
+            self.board.show_button(screen, hint_count)
         while not self.board.game_over():
             for action in pygame.event.get():
                 if action.type == pygame.QUIT:
@@ -271,7 +277,7 @@ class FourInARow:
                         pygame.draw.circle(screen, red,
                                            (posx, int(100 / 2)), 100 / 2 - 5)
                         if hint_count < 3:
-                            self.board.show_button(screen)
+                            self.board.show_button(screen, hint_count)
                         else:
                             pygame.draw.rect(screen, (0, 0, 0),
                                              (self.size * 100, 100, 200,
@@ -288,7 +294,7 @@ class FourInARow:
                     print("Player ", player_number + 1, ": ")
                     if player_number == 0:
                         if hint_count < 3:
-                            self.board.show_button(screen)
+                            self.board.show_button(screen, hint_count)
                         else:
                             pygame.draw.rect(screen, (0, 0, 0),
                                              (self.size * 100, 100, 200,
